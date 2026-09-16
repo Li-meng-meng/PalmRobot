@@ -1,0 +1,45 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# ---- Node / Web ----
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# ---- 仿真产物（体积大，不入库）----
+*.mp4
+*.mov
+*.avi
+simulation/out/
+simulation/outputs/
+*.mjcb
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 密钥 / 本地配置（务必不要提交）----
+*.secret
+.env
+.env.local
+secrets/
+
+# ---- 大体积二进制（按需放开）----
+# *.step
+# *.stl
+# *.3mf
