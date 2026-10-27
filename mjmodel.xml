@@ -1,0 +1,153 @@
+<mujoco model="sesame_quadruped">
+  <compiler angle="radian"/>
+
+  <option integrator="implicitfast" cone="elliptic" iterations="50" ls_iterations="10"/>
+
+  <size njmax="1000" nconmax="200"/>
+
+  <visual>
+    <global azimuth="135" elevation="-25"/>
+    <quality shadowsize="2048"/>
+    <headlight ambient="0.35 0.35 0.35" diffuse="0.7 0.7 0.7" specular="0.2 0.2 0.2"/>
+  </visual>
+
+  <default>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2" density="0"/>
+    </default>
+    <default class="collision">
+      <geom condim="4" group="3" friction="0.9 0.02 0.002" solref="0.004" solimp="0.95 0.99" rgba="0 0 0 0" density="0"/>
+    </default>
+    <default class="servo">
+      <joint armature="2e-05" damping="0.0025" frictionloss="0.002" axis="0 0 -1" limited="true"/>
+    </default>
+    <default class="foot">
+      <geom size="0.007 0 0" condim="6" group="3" friction="1.1 0.003 0.0002" solref="0.004" solimp="0.95 0.99" rgba="0.12 0.12 0.12 1" density="0"/>
+      <site size="0.008 0.005 0.005" group="4" rgba="0 0 0 0"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" colorspace="auto" name="skybox" builtin="gradient" rgb1="0.38 0.48 0.6" rgb2="0.06 0.07 0.09" width="512" height="3072"/>
+    <texture type="2d" colorspace="auto" name="ground_tex" builtin="checker" rgb1="0.18 0.2 0.22" rgb2="0.28 0.3 0.32" width="512" height="512"/>
+    <material name="ground_mat" texture="ground_tex" texrepeat="8 8" reflectance="0.08"/>
+    <material name="orange" roughness="0.72" rgba="1 0.36 0.035 1"/>
+    <material name="charcoal" roughness="0.78" rgba="0.12 0.14 0.16 1"/>
+    <material name="goal_mat" emission="0.15" rgba="0.08 0.85 0.25 1"/>
+    <mesh name="internal_frame_mesh" content_type="model/stl" file="Internal-Frame-v121.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="bottom_cover_mesh" content_type="model/stl" file="Bottom-Cover-v121.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="top_cover_mesh" content_type="model/stl" file="Top-Cover-Enclosed-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="l1_mesh" content_type="model/stl" file="L1-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="l2_mesh" content_type="model/stl" file="L2-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="l3_mesh" content_type="model/stl" file="L3-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="l4_mesh" content_type="model/stl" file="L4-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r1_mesh" content_type="model/stl" file="R1-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r2_mesh" content_type="model/stl" file="R2-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r3_mesh" content_type="model/stl" file="R3-v117.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r4_mesh" content_type="model/stl" file="R4-v117.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="8 8 0.1" type="plane" condim="4" friction="1 0.02 0.002" material="ground_mat"/>
+    <light name="key" pos="-1 -1 2.5" dir="0.348155 0.348155 -0.870388" type="directional"/>
+    <light name="fill" pos="1 1 1.2" dir="-0.431934 -0.259161 -0.863868" diffuse="0.35 0.38 0.42" type="directional"/>
+    <body name="target" pos="1 0 0.035" mocap="true">
+      <geom name="target_visual" size="0.045 0.035" type="cylinder" contype="0" conaffinity="0" group="2" material="goal_mat"/>
+      <site name="goal" size="0.006" rgba="0 1 0 0"/>
+    </body>
+    <body name="obstacle_0" pos="0.45 0.28 0.06">
+      <geom size="0.06 0.06 0.06" type="box" friction="0.9" rgba="0.2 0.35 0.85 1"/>
+    </body>
+    <body name="obstacle_1" pos="0.72 -0.22 0.045">
+      <geom size="0.08 0.045 0.045" type="box" friction="0.9" rgba="0.85 0.2 0.18 1"/>
+    </body>
+    <body name="base" pos="0 0 0.049">
+      <inertial pos="0 0 0.006" mass="0.28" diaginertia="0.000143 0.000178 0.000264"/>
+      <joint name="root" type="free"/>
+      <geom name="body_collision" class="collision" size="0.042 0.034 0.031" pos="0.001 0.004 0.0145" type="box"/>
+      <geom name="internal_frame_visual" class="visual" pos="0.0256198 0.00238918 -0.0151121" quat="0 0 0.707107 0.707107" material="charcoal" mesh="internal_frame_mesh"/>
+      <geom name="bottom_cover_visual" class="visual" pos="0.0256198 0.00238918 -0.0151121" quat="0 0 0.707107 0.707107" material="orange" mesh="bottom_cover_mesh"/>
+      <geom name="top_cover_visual" class="visual" pos="0.0256198 0.00238918 -0.0151121" quat="0 0 0.707107 0.707107" material="orange" mesh="top_cover_mesh"/>
+      <site name="imu" size="0.004" pos="0 0 0.025" group="4" rgba="0.2 0.8 1 0.35"/>
+      <camera name="front_camera" quat="0.579203 0.405616 -0.405616 -0.579203" pos="0.048 0 0.03" fovy="82"/>
+      <body name="r1_link" pos="0.0240966 -0.0206276 0.0179057" quat="0 0 1 0">
+        <inertial pos="-0.01 -0.016 0.005" mass="0.02" diaginertia="2.2e-06 4.8e-06 5.7e-06"/>
+        <joint name="R1" class="servo" range="0.785398 3.14159" ref="2.35619"/>
+        <geom name="r1_visual" class="visual" pos="0.0173524 0.0151982 0.0330178" quat="-0.270598 0.270598 0.653281 -0.653281" material="orange" mesh="r1_mesh"/>
+        <geom name="r1_collision" class="collision" size="0.01 0.0207954" pos="-0.0103552 -0.0156876 0.008895" quat="0.534912 -0.705139 0.465455 0" type="capsule"/>
+        <body name="r3_link" pos="-0.0207104 -0.0313751 0.01779" quat="0.270598 -0.270598 0.653281 -0.653281">
+          <inertial pos="-0.002 -0.024 -0.016" mass="0.006" diaginertia="2.3e-07 1.75e-06 1.86e-06"/>
+          <joint name="R3" class="servo" range="-0.0872665 3.22886" ref="3.14159"/>
+          <geom name="r3_visual" class="visual" pos="-0.0152278 0.0598468 -0.00728707" quat="0.5 0.5 0.5 -0.5" material="orange" mesh="r3_mesh"/>
+          <geom name="r3_shin" class="collision" size="0.006 0.0215833" pos="-0.0008 -0.02003 -0.008" quat="0.827845 -0.560509 0.0223868 0" type="capsule"/>
+          <geom name="r3_foot" class="foot" pos="-0.0016 -0.04006 -0.016"/>
+          <site name="r3_contact" class="foot" pos="-0.0016 -0.04006 -0.016"/>
+        </body>
+      </body>
+      <body name="r2_link" pos="-0.0243034 -0.0206276 0.0179057" quat="0 1 0 0">
+        <inertial pos="-0.01 0.016 0.005" mass="0.02" diaginertia="2.2e-06 4.8e-06 5.7e-06"/>
+        <joint name="R2" class="servo" range="0 2.35619" ref="0.785398"/>
+        <geom name="r2_visual" class="visual" pos="0.0173524 -0.0151982 0.0330178" quat="0.270598 -0.270598 0.653281 -0.653281" material="orange" mesh="r2_mesh"/>
+        <geom name="r2_collision" class="collision" size="0.01 0.0207954" pos="-0.0103552 0.0156876 0.008895" quat="0.534912 0.705139 0.465455 0" type="capsule"/>
+        <body name="r4_link" pos="-0.0207104 0.0313751 0.01779" quat="0.270598 0.270598 0.653281 0.653281">
+          <inertial pos="-0.002 0.024 -0.016" mass="0.006" diaginertia="2.3e-07 1.75e-06 1.86e-06"/>
+          <joint name="R4" class="servo" range="-0.0872665 3.22886"/>
+          <geom name="r4_visual" class="visual" pos="-0.0152278 -0.0598468 -0.00728707" quat="0.5 0.5 0.5 -0.5" material="orange" mesh="r4_mesh"/>
+          <geom name="r4_shin" class="collision" size="0.006 0.0215833" pos="-0.0008 0.02003 -0.008" quat="0.827845 0.560509 0.0223868 0" type="capsule"/>
+          <geom name="r4_foot" class="foot" pos="-0.0016 0.04006 -0.016"/>
+          <site name="r4_contact" class="foot" pos="-0.0016 0.04006 -0.016"/>
+        </body>
+      </body>
+      <body name="l1_link" pos="0.0240966 0.0301724 0.0179057" quat="0 0 1 0">
+        <inertial pos="-0.01 0.016 0.005" mass="0.02" diaginertia="2.2e-06 4.8e-06 5.7e-06"/>
+        <joint name="L1" class="servo" range="0 2.35619" ref="0.785398"/>
+        <geom name="l1_visual" class="visual" pos="0.0173524 -0.0151982 0.0330178" quat="-0.270598 0.270598 -0.653281 0.653281" material="orange" mesh="l1_mesh"/>
+        <geom name="l1_collision" class="collision" size="0.01 0.0207954" pos="-0.0103552 0.0156876 0.008895" quat="0.534912 0.705139 0.465455 0" type="capsule"/>
+        <body name="l3_link" pos="-0.0207104 0.0313751 0.01779" quat="0.270598 0.270598 0.653281 0.653281">
+          <inertial pos="-0.002 0.024 -0.016" mass="0.006" diaginertia="2.3e-07 1.75e-06 1.86e-06"/>
+          <joint name="L3" class="servo" range="-0.0872665 3.22886"/>
+          <geom name="l3_visual" class="visual" pos="-0.0152278 -0.0598468 -0.00728707" quat="0.5 0.5 0.5 -0.5" material="orange" mesh="l3_mesh"/>
+          <geom name="l3_shin" class="collision" size="0.006 0.0215833" pos="-0.0008 0.02003 -0.008" quat="0.827845 0.560509 0.0223868 0" type="capsule"/>
+          <geom name="l3_foot" class="foot" pos="-0.0016 0.04006 -0.016"/>
+          <site name="l3_contact" class="foot" pos="-0.0016 0.04006 -0.016"/>
+        </body>
+      </body>
+      <body name="l2_link" pos="-0.0243034 0.0301724 0.0179057" quat="0 1 0 0">
+        <inertial pos="-0.01 -0.016 0.005" mass="0.02" diaginertia="2.2e-06 4.8e-06 5.7e-06"/>
+        <joint name="L2" class="servo" range="0.785398 3.14159" ref="2.35619"/>
+        <geom name="l2_visual" class="visual" pos="0.0173524 0.0151982 0.0330178" quat="-0.270598 0.270598 0.653281 -0.653281" material="orange" mesh="l2_mesh"/>
+        <geom name="l2_collision" class="collision" size="0.01 0.0207954" pos="-0.0103552 -0.0156876 0.008895" quat="0.534912 -0.705139 0.465455 0" type="capsule"/>
+        <body name="l4_link" pos="-0.0207104 -0.0313751 0.01779" quat="0.270598 -0.270598 0.653281 -0.653281">
+          <inertial pos="-0.002 -0.024 -0.016" mass="0.006" diaginertia="2.3e-07 1.75e-06 1.86e-06"/>
+          <joint name="L4" class="servo" range="-0.0872665 3.22886" ref="3.14159"/>
+          <geom name="l4_visual" class="visual" pos="-0.0152278 0.0598468 -0.00728707" quat="0.5 0.5 0.5 -0.5" material="orange" mesh="l4_mesh"/>
+          <geom name="l4_shin" class="collision" size="0.006 0.0215833" pos="-0.0008 -0.02003 -0.008" quat="0.827845 -0.560509 0.0223868 0" type="capsule"/>
+          <geom name="l4_foot" class="foot" pos="-0.0016 -0.04006 -0.016"/>
+          <site name="l4_contact" class="foot" pos="-0.0016 -0.04006 -0.016"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <general name="R1_servo" joint="R1" ctrlrange="0.785398 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="R2_servo" joint="R2" ctrlrange="0 2.35619" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="L1_servo" joint="L1" ctrlrange="0 2.35619" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="L2_servo" joint="L2" ctrlrange="0.785398 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="R4_servo" joint="R4" ctrlrange="0 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="R3_servo" joint="R3" ctrlrange="0 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="L3_servo" joint="L3" ctrlrange="0 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+    <general name="L4_servo" joint="L4" ctrlrange="0 3.14159" forcerange="-0.18 0.18" biastype="affine" gainprm="5" biasprm="0 -5"/>
+  </actuator>
+
+  <sensor>
+    <framequat objtype="site" objname="imu" name="imu_quat"/>
+    <gyro site="imu" name="imu_gyro" cutoff="35" noise="0.003"/>
+    <accelerometer site="imu" name="imu_accel" cutoff="35" noise="0.02"/>
+    <velocimeter site="imu" name="imu_velocity" cutoff="35" noise="0.002"/>
+    <touch site="r3_contact" name="r3_touch"/>
+    <touch site="r4_contact" name="r4_touch"/>
+    <touch site="l3_contact" name="l3_touch"/>
+    <touch site="l4_contact" name="l4_touch"/>
+  </sensor>
+</mujoco>

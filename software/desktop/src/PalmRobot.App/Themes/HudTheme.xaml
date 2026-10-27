@@ -1,0 +1,278 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ======== 调色板（HUD/EFIS 深色） ======== -->
+    <Color x:Key="ColBg">#0B1220</Color>
+    <Color x:Key="ColPanel">#111A2C</Color>
+    <Color x:Key="ColPanelLight">#18243B</Color>
+    <Color x:Key="ColBorder">#23304A</Color>
+    <Color x:Key="ColCyan">#22D3EE</Color>
+    <Color x:Key="ColCyanDim">#0E7490</Color>
+    <Color x:Key="ColGreen">#34D399</Color>
+    <Color x:Key="ColAmber">#FBBF24</Color>
+    <Color x:Key="ColRed">#F87171</Color>
+    <Color x:Key="ColText">#D7E3F4</Color>
+    <Color x:Key="ColTextDim">#64748B</Color>
+
+    <SolidColorBrush x:Key="BrBg" Color="{StaticResource ColBg}"/>
+    <SolidColorBrush x:Key="BrPanel" Color="{StaticResource ColPanel}"/>
+    <SolidColorBrush x:Key="BrPanelLight" Color="{StaticResource ColPanelLight}"/>
+    <SolidColorBrush x:Key="BrBorder" Color="{StaticResource ColBorder}"/>
+    <SolidColorBrush x:Key="BrCyan" Color="{StaticResource ColCyan}"/>
+    <SolidColorBrush x:Key="BrCyanDim" Color="{StaticResource ColCyanDim}"/>
+    <SolidColorBrush x:Key="BrGreen" Color="{StaticResource ColGreen}"/>
+    <SolidColorBrush x:Key="BrAmber" Color="{StaticResource ColAmber}"/>
+    <SolidColorBrush x:Key="BrRed" Color="{StaticResource ColRed}"/>
+    <SolidColorBrush x:Key="BrText" Color="{StaticResource ColText}"/>
+    <SolidColorBrush x:Key="BrTextDim" Color="{StaticResource ColTextDim}"/>
+
+    <FontFamily x:Key="MonoFont">Consolas</FontFamily>
+
+    <!-- ======== 基础文本 ======== -->
+    <Style x:Key="HudCaption" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource BrTextDim}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+    <Style x:Key="HudValue" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource BrText}"/>
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <!-- ======== 面板卡片 ======== -->
+    <Style x:Key="HudCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource BrPanel}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12"/>
+    </Style>
+
+    <!-- ======== 按钮 ======== -->
+    <Style x:Key="HudButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource BrPanelLight}"/>
+        <Setter Property="Foreground" Value="{StaticResource BrText}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,7"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bd" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrCyan}"/>
+                            <Setter TargetName="bd" Property="Background" Value="#1C2A44"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#152238"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="HudAccentButton" TargetType="Button" BasedOn="{StaticResource HudButton}">
+        <Setter Property="Background" Value="#103A4A"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrCyanDim}"/>
+        <Setter Property="Foreground" Value="{StaticResource BrCyan}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style x:Key="HudDangerButton" TargetType="Button" BasedOn="{StaticResource HudButton}">
+        <Setter Property="Background" Value="#3A1620"/>
+        <Setter Property="BorderBrush" Value="#7F1D2B"/>
+        <Setter Property="Foreground" Value="{StaticResource BrRed}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- ======== 滑块（HUD 轨道） ======== -->
+    <Style x:Key="HudSlider" TargetType="Slider">
+        <Setter Property="Foreground" Value="{StaticResource BrCyan}"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid VerticalAlignment="Center">
+                        <Border x:Name="TrackBg" Height="6" CornerRadius="3"
+                                Background="#1A2740" VerticalAlignment="Center"/>
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{x:Null}">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="6" CornerRadius="3" Background="{StaticResource BrCyanDim}"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{x:Null}">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="Transparent" Height="18"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="16" Height="16" Fill="{StaticResource BrCyan}"
+                                                     Stroke="#0B1220" StrokeThickness="2">
+                                                <Ellipse.Effect>
+                                                    <DropShadowEffect Color="{StaticResource ColCyan}"
+                                                                      BlurRadius="8" ShadowDepth="0" Opacity="0.7"/>
+                                                </Ellipse.Effect>
+                                            </Ellipse>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ======== 输入框 ======== -->
+    <Style x:Key="HudTextBox" TargetType="TextBox">
+        <Setter Property="Background" Value="#0D1526"/>
+        <Setter Property="Foreground" Value="{StaticResource BrText}"/>
+        <Setter Property="CaretBrush" Value="{StaticResource BrCyan}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BrBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="bd" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrCyan}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ======== 列表 ======== -->
+    <Style x:Key="HudListBox" TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+    <Style x:Key="HudListBoxItem" TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="bd" Background="Transparent" CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#16223A"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#123645"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrCyanDim}"/>
+                            <Setter TargetName="bd" Property="BorderThickness" Value="1"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ======== 标签页 ======== -->
+    <Style x:Key="HudTabControl" TargetType="TabControl">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style x:Key="HudTabItem" TargetType="TabItem">
+        <Setter Property="Foreground" Value="{StaticResource BrTextDim}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="bd" Background="Transparent" CornerRadius="6,6,0,0"
+                            Padding="16,8" Margin="0,0,4,0" BorderThickness="0,0,0,2" BorderBrush="Transparent">
+                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource BrText}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource BrCyan}"/>
+                            <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrCyan}"/>
+                            <Setter TargetName="bd" Property="Background" Value="#0F1A2E"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ======== 滚动条（细版） ======== -->
+    <Style TargetType="ScrollBar">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="#2A3A58" CornerRadius="4" Margin="1"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="Height" Value="8"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

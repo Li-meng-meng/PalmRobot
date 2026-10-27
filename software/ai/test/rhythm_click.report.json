@@ -1,0 +1,10 @@
+{
+  "motion": "rhythm-120bpm",
+  "duration_s": 4.0,
+  "played_s": 4.0,
+  "fall": false,
+  "fall_at_s": null,
+  "min_height_m": 0.0461,
+  "max_tilt_deg": 0.8,
+  "verdict": "PASS"
+}

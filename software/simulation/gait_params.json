@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-17",
+  "model": "sesame MJCF (lukehollis/sesame-ml, CAD-derived)",
+  "stand": {
+    "dx_m": 0.0,
+    "dy_m": -0.0,
+    "min_height_m": 0.0461,
+    "max_tilt_deg": 0.0,
+    "fell": false
+  },
+  "march": {
+    "dx_m": -0.006,
+    "dy_m": 0.002,
+    "min_height_m": 0.0461,
+    "max_tilt_deg": 2.2,
+    "fell": false
+  },
+  "gait": {
+    "freq": 3.3,
+    "hip_amp": 28,
+    "hip_mode": "same",
+    "hip_sign": 1,
+    "knee_f": 50,
+    "knee_r": 50,
+    "knee_lead_deg": -45
+  },
+  "walk": {
+    "dx_m": 0.122,
+    "dy_m": 0.057,
+    "min_height_m": 0.0452,
+    "max_tilt_deg": 9.6,
+    "fell": false
+  },
+  "notes": [
+    "ctrl 角度域 = 固件舵机角度域（0-180°），direction/subtrim 均为默认",
+    "控制频率 50 Hz，与固件舵机刷新周期一致",
+    "walk 通过标准：3 s 前进 ≥ 0.10 m（≈3.3 cm/s）、侧偏 < 0.25 m、不摔；Gate 1 的“1 米”在实物上复测"
+  ]
+}

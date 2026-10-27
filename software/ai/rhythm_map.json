@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "comment": "节奏→动作参数映射表（docs/11 §6 约定：Python 与 JS 共读同一份）。hip_amp=髋摆半幅（度，R1/L1 反向）；knee_amp=前膝回弹幅（度，0=关闭）",
+  "bpm": { "min": 60, "max": 180, "default_silent": 100 },
+  "energy_quantiles": [0.33, 0.66],
+  "onset_peak_min": 0.10,
+  "bands": {
+    "low":    { "hip_amp": 20, "knee_amp": 0 },
+    "medium": { "hip_amp": 28, "knee_amp": 8 },
+    "high":   { "hip_amp": 35, "knee_amp": 12 }
+  },
+  "channels": { "hip_r": 0, "hip_l": 2, "knee_fr": 5, "knee_fl": 6 },
+  "pose_stand": [135, 45, 45, 135, 0, 180, 0, 180],
+  "beats_per_loop": 8,
+  "min_frame_gap_ms": 20
+}

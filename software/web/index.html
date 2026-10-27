@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>PalmRobot 3D 预览</title>
+<style>
+  :root {
+    --bg: #0b1220; --panel: #111a2c; --border: #23304a;
+    --cyan: #22d3ee; --green: #34d399; --text: #d7e3f4; --dim: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Microsoft YaHei UI", sans-serif; overflow: hidden; }
+  #app { display: grid; grid-template-columns: 1fr 280px; height: 100%; }
+  #viewport { position: relative; }
+  #hint { position: absolute; left: 12px; top: 10px; font-size: 11px; color: var(--dim); pointer-events: none; }
+  #status { position: absolute; right: 12px; top: 10px; font-size: 11px; color: var(--cyan); pointer-events: none; }
+  aside { border-left: 1px solid var(--border); background: var(--panel);
+    padding: 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+  h1 { font-size: 13px; color: var(--cyan); letter-spacing: 2px; }
+  .cap { font-size: 11px; color: var(--dim); margin-top: 6px; }
+  .ch { margin-bottom: 8px; }
+  .ch .row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; }
+  .ch .val { font-family: Consolas, monospace; color: var(--cyan); font-size: 13px; }
+  input[type=range] { width: 100%; accent-color: var(--cyan); height: 4px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  button { background: #18243b; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 10px; font-size: 12px; cursor: pointer; }
+  button:hover { border-color: var(--cyan); }
+  button.accent { background: #103a4a; border-color: #0e7490; color: var(--cyan); }
+  button.danger { background: #3a1620; border-color: #7f1d2b; color: #f87171; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="viewport">
+    <div id="hint">拖拽旋转 · 滚轮缩放（MuJoCo 同款 Z-up 坐标系）</div>
+    <div id="status"></div>
+  </div>
+  <aside>
+    <h1>PALM ROBOT 3D</h1>
+
+    <div class="cap">舵机手动（0–180°，带机械限位）</div>
+    <div id="sliders"></div>
+
+    <div class="btns">
+      <button class="accent" id="btn-stand">站立位</button>
+      <button class="danger" id="btn-stop">停止播放</button>
+    </div>
+
+    <div class="cap">动作包播放（内嵌样例）</div>
+    <div class="btns">
+      <button class="accent" data-motion="walk">walk</button>
+      <button data-motion="wave">wave</button>
+      <button data-motion="dance">dance</button>
+      <button data-motion="stand">stand</button>
+    </div>
+
+    <div class="cap">本地动作包（选择或拖入 .motion 文件，视频转动作产物均可）</div>
+    <div class="btns">
+      <button class="accent" id="btn-open">打开 .motion 文件</button>
+    </div>
+    <input type="file" id="file-open" accept=".motion,.json" style="display:none">
+
+    <div class="cap" id="motion-info" style="color:var(--green)"></div>
+  </aside>
+</div>
+
+<script src="./vendor/three.min.js"></script>
+<script src="./vendor/OrbitControls.js"></script>
+<script src="./vendor/STLLoader.js"></script>
+<script src="./assets/robot-assets.js"></script>
+<script src="./preview.js"></script>
+<script>
+(function () {
+  var CH = ['R1', 'R2', 'L1', 'L2', 'R4', 'R3', 'L3', 'L4'];
+  var PARTS = ['前右髋', '后右髋', '前左髋', '后左髋', '后右膝', '前右膝', '前左膝', '后左膝'];
+  var LIMITS = [[45,180],[0,135],[0,135],[45,180],[0,180],[0,180],[0,180],[0,180]];
+  var STAND = [135, 45, 45, 135, 0, 180, 0, 180];
+  var angles = STAND.slice();
+  var sliders = [];
+
+  var box = document.getElementById('viewport');
+  var status = document.getElementById('status');
+  PalmRobotPreview.onStatus = function (t) { status.textContent = t; };
+
+  PalmRobotPreview.init(box).then(function () {
+    buildSliders();
+    bindMotions();
+  }).catch(function (e) {
+    status.textContent = '初始化失败: ' + e.message;
+  });
+
+  function buildSliders() {
+    var wrap = document.getElementById('sliders');
+    CH.forEach(function (j, i) {
+      var d = document.createElement('div');
+      d.className = 'ch';
+      d.innerHTML = '<div class="row"><span>ch' + i + ' · ' + j + ' · ' + PARTS[i] +
+        '</span><span class="val" id="v' + i + '">' + angles[i] + '°</span></div>';
+      var s = document.createElement('input');
+      s.type = 'range'; s.min = LIMITS[i][0]; s.max = LIMITS[i][1]; s.value = angles[i];
+      s.addEventListener('input', function () {
+        angles[i] = +s.value;
+        document.getElementById('v' + i).textContent = angles[i] + '°';
+        PalmRobotPreview.setServoAngles(angles.slice());
+      });
+      d.appendChild(s); wrap.appendChild(d);
+      sliders.push(s);
+    });
+  }
+
+  function setAll(a) {
+    angles = a.slice();
+    angles.forEach(function (v, i) {
+      sliders[i].value = v;
+      document.getElementById('v' + i).textContent = v + '°';
+    });
+    PalmRobotPreview.setServoAngles(angles.slice());
+  }
+
+  document.getElementById('btn-stand').onclick = function () { setAll(STAND); };
+  document.getElementById('btn-stop').onclick = function () {
+    PalmRobotPreview.stopMotion();
+    document.getElementById('motion-info').textContent = '';
+  };
+
+  function bindMotions() {
+    document.querySelectorAll('button[data-motion]').forEach(function (b) {
+      b.onclick = function () {
+        var name = b.getAttribute('data-motion');
+        if (PalmRobotPreview.playMotion(name)) {
+          document.getElementById('motion-info').textContent = '▶ 播放 ' + name;
+        }
+      };
+    });
+  }
+
+  // 本地 .motion 文件：file input 选择 或 拖到 3D 视口上（file:// 下 FileReader 可用）
+  function playLocalMotion(file) {
+    var info = document.getElementById('motion-info');
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var m = JSON.parse(reader.result);
+        if (m.version !== 1 || !m.tracks || !Array.isArray(m.tracks.servo))
+          throw new Error('不是有效的 .motion（version=1 + tracks.servo）');
+        if (!PalmRobotPreview.playMotion(m)) throw new Error('播放器拒绝该动作包');
+        info.textContent = '▶ 播放 ' + (m.name || file.name) +
+          '（' + m.duration_ms + ' ms' + (m.loop ? ' · 循环' : '') + '）';
+      } catch (e) {
+        info.textContent = '✗ ' + e.message; info.style.color = '#f87171';
+      }
+    };
+    reader.readAsText(file);
+  }
+  document.getElementById('btn-open').onclick = function () {
+    document.getElementById('file-open').click();
+  };
+  document.getElementById('file-open').onchange = function () {
+    if (this.files && this.files[0]) playLocalMotion(this.files[0]);
+    this.value = '';
+  };
+  ['dragover', 'drop'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { e.preventDefault(); });
+  });
+  document.getElementById('viewport').addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) playLocalMotion(f);
+  });
+
+  // 宿主（WebView2）注入角度：window.PalmRobotPreview 已可直接被外部脚本调用
+  // 也可通过 postMessage：{type:'angles', value:[...8]} 或 {type:'motion', name:'walk'}
+  if (window.chrome && window.chrome.webview) {
+    window.chrome.webview.addEventListener('message', function (e) {
+      var m = e.data || {};
+      if (m.type === 'angles' && Array.isArray(m.value)) setAll(m.value);
+      else if (m.type === 'motion' && m.data) PalmRobotPreview.playMotion(m.data);
+      else if (m.type === 'motion' && m.name) PalmRobotPreview.playMotion(m.name);
+      else if (m.type === 'stop') PalmRobotPreview.stopMotion();
+    });
+    window.chrome.webview.postMessage({ type: 'preview-ready' });
+  }
+})();
+</script>
+</body>
+</html>

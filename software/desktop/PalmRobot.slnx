@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PalmRobot.App/PalmRobot.App.csproj" />
+    <Project Path="src/PalmRobot.Core/PalmRobot.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PalmRobot.Core.Tests/PalmRobot.Core.Tests.csproj" />
+  </Folder>
+</Solution>

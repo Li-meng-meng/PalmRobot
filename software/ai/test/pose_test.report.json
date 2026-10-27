@@ -1,0 +1,10 @@
+{
+  "motion": "pose-pose_test",
+  "duration_s": 30.4,
+  "played_s": 30.4,
+  "fall": false,
+  "fall_at_s": null,
+  "min_height_m": 0.0461,
+  "max_tilt_deg": 1.9,
+  "verdict": "PASS"
+}

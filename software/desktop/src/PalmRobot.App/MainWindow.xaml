@@ -1,0 +1,351 @@
+<Window x:Class="PalmRobot.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:PalmRobot.App.ViewModels"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="PalmRobot 上位机" Height="820" Width="1280" MinWidth="1080" MinHeight="640"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource BrBg}"
+        FontFamily="Microsoft YaHei UI">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ======== 顶栏 ======== -->
+        <Border Grid.Row="0" Background="#0D1526" BorderBrush="{StaticResource BrBorder}" BorderThickness="0,0,0,1" Padding="16,10">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="{StaticResource BrTextDim}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Fill" Value="{StaticResource BrGreen}"/>
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="#34D399" BlurRadius="10" ShadowDepth="0"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+                <TextBlock Text="PALM ROBOT" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrCyan}"
+                           VerticalAlignment="Center" FontFamily="Consolas"/>
+                <TextBlock Text="  调试上位机" FontSize="13" Foreground="{StaticResource BrTextDim}" VerticalAlignment="Center"/>
+                <Border Background="{StaticResource BrPanel}" CornerRadius="4" Padding="8,3" Margin="16,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ConnectionText}" FontSize="11.5" Foreground="{StaticResource BrText}"/>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- ======== 主体 ======== -->
+        <Grid Grid.Row="1" Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧：设备列表 -->
+            <Border Grid.Column="0" Style="{StaticResource HudCard}" Margin="0,0,12,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="设备" Style="{StaticResource HudCaption}"/>
+                    <Button DockPanel.Dock="Top" Content="扫描串口" Command="{Binding ScanCommand}"
+                            Style="{StaticResource HudButton}" Margin="0,0,0,8"/>
+                    <ListBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}"
+                             Style="{StaticResource HudListBox}"
+                             ItemContainerStyle="{StaticResource HudListBoxItem}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" Foreground="{StaticResource BrText}" FontSize="13"/>
+                                    <TextBlock Text="{Binding Kind}" Foreground="{StaticResource BrTextDim}" FontSize="10.5"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- 右侧：标签页工作区 -->
+            <Border Grid.Column="1" Style="{StaticResource HudCard}" Padding="4">
+                <TabControl Style="{StaticResource HudTabControl}">
+                    <TabItem Header="调 试" Style="{StaticResource HudTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8,8,8,4">
+                            <StackPanel>
+
+                                <!-- 连接按钮 -->
+                                <StackPanel Orientation="Horizontal" Margin="4,4,0,10">
+                                    <Button Content="连 接" Command="{Binding ConnectCommand}"
+                                            Style="{StaticResource HudAccentButton}" Margin="0,0,8,0"/>
+                                    <Button Content="断 开" Command="{Binding DisconnectCommand}"
+                                            Style="{StaticResource HudButton}"/>
+                                </StackPanel>
+
+                                <!-- 8 舵机滑块 2×4 -->
+                                <TextBlock Text="舵机手动微调（拖动即发 FRAME，5Hz 节流）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <UniformGrid Columns="4" Rows="2" Margin="0,0,0,12">
+                                    <UniformGrid.Resources>
+                                        <Style TargetType="Border" BasedOn="{StaticResource HudCard}">
+                                            <Setter Property="Margin" Value="4"/>
+                                            <Setter Property="Padding" Value="10,8"/>
+                                        </Style>
+                                    </UniformGrid.Resources>
+                                    <Border DataContext="{Binding ServoChannels[0]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[1]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[2]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[3]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[4]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[5]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[6]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border DataContext="{Binding ServoChannels[7]}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Header}" Style="{StaticResource HudCaption}"/>
+                                                <TextBlock Style="{StaticResource HudValue}" FontSize="22">
+                                                    <Run Text="{Binding Angle, Mode=OneWay}"/><Run Text="°" Foreground="{StaticResource BrTextDim}"/>
+                                                </TextBlock>
+                                                <Slider Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Angle}"
+                                                        Style="{StaticResource HudSlider}" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                                            </StackPanel>
+                                        </Border>
+                                </UniformGrid>
+
+                                <!-- 预设姿态 -->
+                                <TextBlock Text="预设姿态（POSE）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,12">
+                                    <Button Content="站立 stand" Command="{Binding PoseCommand}" CommandParameter="stand" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="坐下 sit" Command="{Binding PoseCommand}" CommandParameter="sit" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="挥手 wave" Command="{Binding PoseCommand}" CommandParameter="wave" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="跳舞 dance" Command="{Binding PoseCommand}" CommandParameter="dance" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="睡眠 sleep" Command="{Binding PoseCommand}" CommandParameter="sleep" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="急停 STOP" Command="{Binding StopCommand}" Style="{StaticResource HudDangerButton}"/>
+                                </StackPanel>
+
+                                <!-- 编排动作库（PLAY） -->
+                                <TextBlock Text="编排动作库（PLAY · 8 关节直接编排）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,12">
+                                    <Button Content="太极 tai_chi" Command="{Binding PlayCommand}" CommandParameter="tai_chi" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="天鹅舞 swan" Command="{Binding PlayCommand}" CommandParameter="swan" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="蹦恰恰 cha_cha" Command="{Binding PlayCommand}" CommandParameter="cha_cha" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="华尔兹 waltz" Command="{Binding PlayCommand}" CommandParameter="waltz" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="月光流 moonflow" Command="{Binding PlayCommand}" CommandParameter="moonflow" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="猫式伸展 yoga" Command="{Binding PlayCommand}" CommandParameter="yoga" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="待机呼吸 idle" Command="{Binding PlayCommand}" CommandParameter="idle" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="蹦跳 bounce" Command="{Binding PlayCommand}" CommandParameter="bounce" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="走路 walk" Command="{Binding PlayCommand}" CommandParameter="walk" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="街舞 bboy" Command="{Binding PlayCommand}" CommandParameter="bboy_steve" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="手势舞 hand" Command="{Binding PlayCommand}" CommandParameter="hand_gestures" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                </StackPanel>
+
+                                <!-- 互动情绪动作（PLAY · 带表情轨道） -->
+                                <TextBlock Text="互动情绪（PLAY · 带表情轨道）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,12">
+                                    <Button Content="点头 yes" Command="{Binding PlayCommand}" CommandParameter="yes" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="摇头 no" Command="{Binding PlayCommand}" CommandParameter="no" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="开心 happy" Command="{Binding PlayCommand}" CommandParameter="happy" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="撒娇 act_cute" Command="{Binding PlayCommand}" CommandParameter="act_cute" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="惊吓 startled" Command="{Binding PlayCommand}" CommandParameter="startled" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="鞠躬 bow" Command="{Binding PlayCommand}" CommandParameter="bow" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="开机欢迎 greet_show" Command="{Binding PlayCommand}" CommandParameter="greet_show" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                </StackPanel>
+
+                                <!-- 表情预设 -->
+                                <TextBlock Text="表情预设（FACE）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,4">
+                                    <Button Content="开心" Command="{Binding FacePresetCommand}" CommandParameter="happy" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="难过" Command="{Binding FacePresetCommand}" CommandParameter="sad" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="生气" Command="{Binding FacePresetCommand}" CommandParameter="angry" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="惊讶" Command="{Binding FacePresetCommand}" CommandParameter="surprise" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="睡眠" Command="{Binding FacePresetCommand}" CommandParameter="sleep" Style="{StaticResource HudButton}" Margin="0,0,8,0"/>
+                                    <Button Content="中性" Command="{Binding FacePresetCommand}" CommandParameter="neutral" Style="{StaticResource HudButton}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="命令行" Style="{StaticResource HudTabItem}">
+                        <DockPanel Margin="12">
+                            <TextBlock DockPanel.Dock="Top" Text="原始指令（与串口输入完全一致，如 PING / STATUS / CFG GET）"
+                                       Style="{StaticResource HudCaption}"/>
+                            <Border DockPanel.Dock="Bottom" Background="#0D1526" CornerRadius="6" Padding="6" Margin="0,8,0,0">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="发送" Command="{Binding SendConsoleCommand}"
+                                            Style="{StaticResource HudAccentButton}" Margin="8,0,0,0"/>
+                                    <TextBox Text="{Binding ConsoleInput, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource HudTextBox}" KeyDown="ConsoleInput_KeyDown"/>
+                                </DockPanel>
+                            </Border>
+                            <ListBox x:Name="ConsoleList" ItemsSource="{Binding ConsoleLines}" Style="{StaticResource HudListBox}"
+                                     FontFamily="Consolas" FontSize="12.5" Margin="0,4,0,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Run Text="{Binding Direction, Mode=OneWay}" Foreground="{StaticResource BrCyan}"/>
+                                            <Run Text="{Binding Line, Mode=OneWay}">
+                                                <Run.Style>
+                                                    <Style TargetType="Run">
+                                                        <Setter Property="Foreground" Value="{StaticResource BrText}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource BrRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Run.Style>
+                                            </Run>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </TabItem>
+
+                    <TabItem Header="3D 预览" Style="{StaticResource HudTabItem}">
+                        <Grid Margin="12">
+                            <wv2:WebView2 x:Name="Preview3D"/>
+                            <TextBlock x:Name="PreviewHint" Text="WebView2 初始化中…" Foreground="{StaticResource BrTextDim}"
+                                       HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,8" FontSize="11"/>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="仿真画面" Style="{StaticResource HudTabItem}">
+                        <Grid Margin="12">
+                            <Border Background="#050a14" CornerRadius="6" BorderBrush="{StaticResource BrBorder}" BorderThickness="1">
+                                <Image x:Name="SimVideoImage" Stretch="Uniform"/>
+                            </Border>
+                            <TextBlock x:Name="SimVideoHint" Text="连接「仿真机器人」后，此处实时显示 MuJoCo 物理仿真画面（5 Hz）"
+                                       Foreground="{StaticResource BrTextDim}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="视频转动作" Style="{StaticResource HudTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8,8,8,4">
+                            <StackPanel>
+                                <TextBlock Text="① 导入视频（mp4 / mov / avi / webm）" Style="{StaticResource HudCaption}" Margin="4,4,0,6"/>
+                                <DockPanel Margin="4,0,4,14">
+                                    <Button DockPanel.Dock="Right" Content="选择视频…" Command="{Binding PickVideoCommand}"
+                                            Style="{StaticResource HudButton}" Margin="8,0,0,0"/>
+                                    <TextBox Text="{Binding VideoPath, Mode=OneWay}" Style="{StaticResource HudTextBox}" IsReadOnly="True"/>
+                                </DockPanel>
+
+                                <TextBlock Text="② 生成模式 → 生成 .motion" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,14">
+                                    <RadioButton Content="L1 律动（音频 BPM，秒级）" GroupName="genmode" IsChecked="{Binding GenModeL1}"
+                                                 Foreground="{StaticResource BrText}" VerticalAlignment="Center" Margin="4,0,16,0"/>
+                                    <RadioButton Content="L2 姿态重定向（人体关键点，逐帧推理）" GroupName="genmode" IsChecked="{Binding GenModeL2}"
+                                                 Foreground="{StaticResource BrText}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                    <Button Content="生成动作" Command="{Binding GenerateVideoMotionCommand}" Style="{StaticResource HudAccentButton}"/>
+                                </StackPanel>
+
+                                <TextBlock Text="生成结果" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <TextBlock Text="{Binding VideoResultText}" Style="{StaticResource HudValue}" FontSize="12.5"
+                                           TextWrapping="Wrap" Margin="4,0,4,14"/>
+
+                                <TextBlock Text="③ 下发（先在左侧连接设备：仿真机器人 = 虚拟引擎；真机插 USB 后选串口）" Style="{StaticResource HudCaption}" Margin="4,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,4">
+                                    <Button Content="上传到设备并播放" Command="{Binding DeployGeneratedCommand}"
+                                            Style="{StaticResource HudAccentButton}" Margin="4,0,8,0"/>
+                                </StackPanel>
+                                <TextBlock Text="生成后自动在「3D 预览」页同步播放；上传走 PUTM + PLAY，三种设备（模拟 / 仿真 / 真机）同一套流程"
+                                           Style="{StaticResource HudCaption}" Margin="4,12,0,0"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="日志" Style="{StaticResource HudTabItem}">
+                        <ListBox x:Name="LogList" ItemsSource="{Binding LogLines}" Style="{StaticResource HudListBox}"
+                                 FontFamily="Consolas" FontSize="11.5" Margin="12"/>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </Grid>
+
+        <!-- ======== 状态栏 ======== -->
+        <Border Grid.Row="2" Background="#0D1526" BorderBrush="{StaticResource BrBorder}" BorderThickness="0,1,0,0" Padding="16,8">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding FirmwareVersion, StringFormat=固件 {0}}" Style="{StaticResource HudValue}" FontSize="12" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding VoltageText, StringFormat=电压 {0}}" Style="{StaticResource HudValue}" FontSize="12" Foreground="{StaticResource BrGreen}" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding TemperatureText, StringFormat=温度 {0}}" Style="{StaticResource HudValue}" FontSize="12" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding BatteryText, StringFormat=电量 {0}}" Style="{StaticResource HudValue}" FontSize="12" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding PoseText, StringFormat=姿态 {0}}" Style="{StaticResource HudValue}" FontSize="12" Foreground="{StaticResource BrCyan}" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding ErrorText, StringFormat=错误 {0}}" Style="{StaticResource HudValue}" FontSize="12" Margin="0,0,24,0"/>
+                <TextBlock Text="{Binding FrameRateText, StringFormat=指令 {0}}" Style="{StaticResource HudValue}" FontSize="12" Foreground="{StaticResource BrTextDim}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

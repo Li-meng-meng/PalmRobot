@@ -9,7 +9,11 @@
 | 资产 | 来源 | 用途 |
 |---|---|---|
 | 全套 STL | [dorianborian/sesame-robot](https://github.com/dorianborian/sesame-robot) → `hardware/printing/stl/` | 3D 打印 |
-| 完整 CAD (STEP) | 同上 → `hardware/cad/` | 改结构时用 |
+
+> **`printing/stl/` 已就位（2026-09-21）**：当前是从虚拟引擎提取的仿真实载 11 件（机身骨架 / 底盖 / 封闭顶盖 + 左右腿大小腿各 4），单位 mm、已过水密检查，打印清单与建议见 [`printing/README.md`](printing/README.md)。上游仓库另有完整 STEP 与猫耳 / 无耳顶盖变体，需要时再取。
+>
+> **STP 版已就位（2026-09-21）**：`cad/Sesame-ESP32-v122.step`（上游整机装配 B-rep，29.5MB）+ `printing/stp/` 单件 STP ×11（装配拆件 10 + 顶盖 STL 转换 1），回读校验通过；切片器要 STP 或 CAD 改件用它，见 [`printing/README.md`](printing/README.md)。
+| 完整 CAD (STEP) | 同上 → `hardware/cad/`（`Sesame-ESP32-v122.step` 已就位，拆件工具 `cad/split_step.py`） | 改结构时用 |
 | **三种现成顶盖** | 同上 → `stl/top-covers/`（猫耳 / 无耳 / 封闭式） | **换壳测试直接用** |
 | **磁吸帽子系统** | 同上 → `stl/top-covers/hats/` | **扩展接口可复用其磁吸规范** |
 
